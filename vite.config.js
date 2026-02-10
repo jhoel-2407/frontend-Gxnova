@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite'
-import tailwindcss from '@tailwindcss/vite'
-
 export default defineConfig({
-  plugins: [
-    tailwindcss(),
-  ],
-})
+  plugins: [react()],
+  preview: {
+    host: true,
+    port: process.env.PORT,
+    allowedHosts: "all"
+  }
+});
