@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import logoGxnova from "../assets/gxnova-logo.png";
 import LoginForm from "./auth/LoginForm";
 import RegisterForm from "./auth/RegisterForm";
@@ -8,6 +10,9 @@ const PRIMARY_COLOR = "orange-600";
 const HOVER_COLOR = "orange-700";
 
 function Auth() {
+    const { login, register } = useAuth();
+    const navigate = useNavigate();
+
     const [view, setView] = useState('login'); // 'login' o 'register'
     const [message, setMessage] = useState(null); // Mensaje de feedback/error
     const [messageType, setMessageType] = useState(null); // 'success' o 'error'
@@ -60,20 +65,18 @@ function Auth() {
             const data = await respuesta.json();
 
             if (data.token) {
-                localStorage.setItem("token", data.token);
-                localStorage.setItem("usuario", JSON.stringify(data.usuario));
-                showMessage('success', "✅ Inicio de sesión exitoso. Redirigiendo...");
+                // Usamos la función login del contexto
+                login(data.token, data.usuario);
+                showMessage('success', "Inicio de sesión exitoso. Redirigiendo...");
 
                 // Verificar si es administrador
                 const esAdmin = data.usuario.rolesAsignados && data.usuario.rolesAsignados.some(r => r.rol.nombre === 'Administrador');
 
                 setTimeout(() => {
                     if (esAdmin) {
-                        window.location.href = "/admin";
+                        navigate("/admin");
                     } else {
-                        // Si no es admin, lo mandamos a la landing 
-                        // Como la web es administrativa, quizás mostrar mensaje o mandar a home
-                        window.location.href = "/";
+                        navigate("/");
                     }
                 }, 1500);
             } else {
@@ -81,7 +84,7 @@ function Auth() {
             }
         } catch (error) {
             console.error("Error de Login:", error.message);
-            showMessage('error', `❌ ${error.message}`);
+            showMessage('error', ` ${error.message}`);
         }
     };
 
@@ -116,16 +119,16 @@ function Auth() {
             const data = await respuesta.json();
 
             if (respuesta.ok) {
-                showMessage('success', "✅ Registro exitoso. Ahora puedes iniciar sesión.");
+                showMessage('success', "Registro exitoso. Ahora puedes iniciar sesión.");
                 setNombre(''); setApellido(''); setEmailRegister(''); setPasswordRegister(''); setConfirmPassword(''); setTelefono(''); setRolNombre('Trabajador');
                 setTimeout(() => handleToggleView("login"), 2000);
 
             } else {
-                showMessage('error', `❌ Error en el registro: ${data.message || 'Error desconocido'}`);
+                showMessage('error', ` Error en el registro: ${data.message || 'Error desconocido'}`);
             }
         } catch (error) {
             console.error("Error de Registro:", error);
-            showMessage('error', "❌ Error de conexión con el servidor.");
+            showMessage('error', " Error de conexión con el servidor.");
         }
     };
 
@@ -135,18 +138,7 @@ function Auth() {
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-inter">
-            <style>{`
-                /* Font import for Inter */
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-                .font-inter { font-family: 'Inter', sans-serif; }
-                /* Custom Primary Color Mapping */
-                .bg-primary { background-color: #f97316; }
-                .text-primary { color: #f97316; }
-                .hover\\:bg-primary\\/90:hover { background-color: rgba(249, 115, 22, 0.9); }
-                .focus\\:ring-primary\\/50:focus { --tw-ring-color: rgba(249, 115, 22, 0.5); }
-                .text-primary\\/70 { color: rgba(249, 115, 22, 0.7); }
-                
-            `}</style>
+
             <div className="w-full max-w-md space-y-6">
                 <div className="text-center space-y-3">
                     <div className={`w-16 h-16 mx-auto rounded-full bg-${PRIMARY_COLOR} flex items-center justify-center text-white text-2xl font-bold`}>
@@ -234,7 +226,7 @@ function Auth() {
                     </p>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { Search, Bell, MessageSquare, Plus, Menu } from "lucide-react";
 import logoGxnova from "../assets/gxnova-logo.png";
 import { useNavigate } from "react-router-dom";
@@ -10,22 +11,20 @@ import API_URL from '../config/api';
 
 function Encabezado() {
     const navigate = useNavigate();
+    const { user, token, logout } = useAuth();
     const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
-    const [usuario, setUsuario] = useState(null);
     const [mostrarMenuUsuario, setMostrarMenuUsuario] = useState(false);
     const [mostrarMenuMovil, setMostrarMenuMovil] = useState(false);
     const [busqueda, setBusqueda] = useState("");
 
+    // Sincronizar notificaciones cuando hay usuario
     useEffect(() => {
-        const token = localStorage.getItem("token");
         if (token) {
             cargarNotificacionesNoLeidas();
-            cargarUsuario();
         }
-    }, []);
+    }, [token]);
 
     const cargarNotificacionesNoLeidas = async () => {
-        const token = localStorage.getItem("token");
         if (!token) return;
 
         try {
@@ -44,29 +43,8 @@ function Encabezado() {
         }
     };
 
-    const cargarUsuario = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        try {
-            const respuesta = await fetch(`${API_URL}/api/usuarios/perfil`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (respuesta.ok) {
-                const data = await respuesta.json();
-                setUsuario(data.usuario);
-            }
-        } catch (error) {
-            console.error("Error al cargar usuario:", error);
-        }
-    };
-
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        setUsuario(null);
+        logout();
         setCantidadNotificaciones(0);
         setMostrarMenuUsuario(false);
         navigate("/");
@@ -85,7 +63,7 @@ function Encabezado() {
     const inputClasses = "flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-50";
     const badgeClasses = "absolute -top-1 -right-1 w-5 h-5 rounded-full text-white text-xs p-0 flex items-center justify-center font-bold";
 
-    const estaLogueado = !!localStorage.getItem("token");
+    const estaLogueado = !!user;
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
@@ -110,7 +88,7 @@ function Encabezado() {
                             </div>
                         </div>
 
-                        <Navbar estaLogueado={estaLogueado} ghostButtonClasses={ghostButtonClasses} />
+                        <Navbar estaLogueado={!!user} ghostButtonClasses={ghostButtonClasses} />
                     </div>
 
                     <SearchBar
@@ -171,7 +149,7 @@ function Encabezado() {
                                 </button>
 
                                 <UserMenu
-                                    usuario={usuario}
+                                    usuario={user}
                                     cantidadNotificaciones={cantidadNotificaciones}
                                     mostrarMenuUsuario={mostrarMenuUsuario}
                                     setMostrarMenuUsuario={setMostrarMenuUsuario}

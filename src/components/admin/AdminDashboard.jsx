@@ -91,9 +91,6 @@ const AdminDashboard = () => {
                     <h1 className="text-3xl font-bold text-gray-800">Dashboard Administrativo</h1>
                     <p className="text-gray-500 mt-1">Resumen general de la plataforma</p>
                 </div>
-                <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-2">
-                    <p className="text-sm text-indigo-700 font-medium">📱 Funcionalidad principal en móvil</p>
-                </div>
             </div>
 
             {/* Cards de Estadísticas */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API_URL from '../config/api';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Encabezado from "./Encabezado";
 import DatosPersonales from "./perfil/DatosPersonales";
 import FormularioPerfil from "./perfil/FormularioPerfil";
@@ -9,6 +10,7 @@ import MisPublicaciones from "./perfil/MisPublicaciones";
 
 function Perfil() {
     const navigate = useNavigate();
+    const { token, logout } = useAuth();
     const [usuario, setUsuario] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editando, setEditando] = useState(false);
@@ -18,7 +20,6 @@ function Perfil() {
     }, []);
 
     const cargarPerfil = async () => {
-        const token = localStorage.getItem("token");
         if (!token) {
             navigate("/auth");
             return;
@@ -33,7 +34,7 @@ function Perfil() {
             });
 
             if (respuesta.status === 401) {
-                localStorage.removeItem("token");
+                logout();
                 navigate("/auth");
                 return;
             }

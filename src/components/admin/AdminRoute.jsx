@@ -1,20 +1,19 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const AdminRoute = () => {
-    const usuarioStored = localStorage.getItem('usuario');
+    const { user, loading, isAdmin } = useAuth();
 
-    if (!usuarioStored) {
+    if (loading) {
+        return <div>Cargando...</div>; // O un componente de Spinner
+    }
+
+    if (!user) {
         return <Navigate to="/auth" replace />;
     }
 
-    const usuario = JSON.parse(usuarioStored);
-
-    // Verificar si tiene el rol de Administrador
-    const esAdmin = usuario.rolesAsignados?.some(r => r.rol.nombre === 'Administrador');
-
-    if (!esAdmin) {
-        // Si está logueado pero no es admin, lo mandamos al inicio (o a una página de 403)
+    if (!isAdmin()) {
         return <Navigate to="/" replace />;
     }
 

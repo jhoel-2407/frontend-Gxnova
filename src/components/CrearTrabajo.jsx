@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import API_URL from '../config/api';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import Encabezado from "./Encabezado";
 
 function CrearTrabajo() {
     const navigate = useNavigate();
+    const { token } = useAuth();
     const [categorias, setCategorias] = useState([]);
     const [formData, setFormData] = useState({
         id_categoria: "",
@@ -20,7 +22,6 @@ function CrearTrabajo() {
     });
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
         if (!token) {
             navigate("/auth");
             return;
@@ -62,7 +63,6 @@ function CrearTrabajo() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const token = localStorage.getItem("token");
 
         if (!formData.id_categoria || !formData.titulo || !formData.descripcion || !formData.ubicacion) {
             alert("Por favor completa todos los campos obligatorios");
