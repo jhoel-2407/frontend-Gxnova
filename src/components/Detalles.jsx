@@ -3,7 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import API_URL from '../config/api';
 import Encabezado from "./Encabezado";
 import ModalCalificar from "./calificaciones/ModalCalificar";
+import ModalPerfilTrabajador from "./perfil/ModalPerfilTrabajador";
 import Estrellas from "./common/Estrellas";
+import { FileText, DollarSign, MapPin, Calendar, User, ClipboardList, MessageSquare, Rocket, Check, X, Clock } from 'lucide-react';
 
 function Detalles() {
     const { id } = useParams();
@@ -17,6 +19,8 @@ function Detalles() {
 
     // Estados para calificaciones
     const [modalCalificarOpen, setModalCalificarOpen] = useState(false);
+    const [modalPerfilOpen, setModalPerfilOpen] = useState(false);
+    const [trabajadorSeleccionado, setTrabajadorSeleccionado] = useState(null);
     const [miCalificacion, setMiCalificacion] = useState(null);
     const [usuarioAReceptar, setUsuarioAReceptar] = useState(null);
 
@@ -260,234 +264,308 @@ function Detalles() {
     }
 
     return (
-        <div>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <Encabezado />
 
-            <div className="container mx-auto px-4 py-8 max-w-5xl">
+            <div className="container mx-auto px-4 py-8 max-w-6xl">
                 <button
                     onClick={() => navigate("/servicios")}
-                    className="mb-6 text-orange-600 hover:text-orange-700 flex items-center gap-2"
+                    className="mb-6 text-orange-600 hover:text-orange-700 flex items-center gap-2 font-medium transition-colors"
                 >
                     ← Volver a Servicios
                 </button>
 
-                {/* Información Principal */}
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-semibold rounded-full">
-                                {trabajo.categoria?.nombre || "Sin categoría"}
-                            </span>
-                            <span className="ml-2 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full capitalize">
-                                {trabajo.estado}
-                            </span>
+                {/* Layout de dos columnas */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Columna Principal */}
+                    <div className="lg:col-span-2 space-y-6">
+                        {/* Información Principal */}
+                        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="flex gap-2 flex-wrap">
+                                    <span className="px-4 py-1.5 bg-gradient-to-r from-orange-100 to-orange-50 text-orange-800 text-sm font-semibold rounded-full border border-orange-200">
+                                        {trabajo.categoria?.nombre || "Sin categoría"}
+                                    </span>
+                                    <span className={`px-4 py-1.5 text-sm font-semibold rounded-full capitalize border ${trabajo.estado === 'publicado' ? 'bg-green-50 text-green-700 border-green-200' :
+                                        trabajo.estado === 'en_progreso' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                            trabajo.estado === 'completado' ? 'bg-gray-50 text-gray-700 border-gray-200' :
+                                                'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                        }`}>
+                                        {trabajo.estado.replace('_', ' ')}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <h1 className="text-4xl font-bold text-gray-900 mb-6 leading-tight">{trabajo.titulo}</h1>
+
+                            {/* Foto del Trabajo */}
+                            {trabajo.foto && (
+                                <div className="mb-8">
+                                    <img
+                                        src={trabajo.foto.startsWith('http') ? trabajo.foto : `${API_URL}${trabajo.foto}`}
+                                        alt="Foto del trabajo"
+                                        className="w-full rounded-xl shadow-lg object-cover max-h-[500px] border border-gray-200"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Descripción */}
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <span className="text-orange-600">📋</span> Descripción
+                                </h2>
+                                <p className="text-gray-700 whitespace-pre-wrap leading-relaxed text-lg">{trabajo.descripcion}</p>
+                            </div>
+
+                            {/* LÓGICA DE BOTONES DE ACCIÓN (Postular / Calificar) */}
+
+                            {/* Trabajo Completado -> Mostrar Calificación */}
+                            {trabajo.estado === 'completado' && usuarioAReceptar && (
+                                <div className="mt-6 p-6 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl">
+                                    <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                        <span>⭐</span> Calificación del Servicio
+                                    </h3>
+                                    {miCalificacion ? (
+                                        <div>
+                                            <p className="text-sm text-gray-600 mb-2">Ya calificaste este servicio:</p>
+                                            <Estrellas puntuacion={miCalificacion.puntuacion} />
+                                            {miCalificacion.comentario && (
+                                                <p className="text-gray-700 mt-3 italic bg-white p-4 rounded-lg">"{miCalificacion.comentario}"</p>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <p className="text-gray-700 mb-4">El trabajo ha finalizado. Por favor califica a <strong>{usuarioAReceptor.nombre}</strong>.</p>
+                                            <button
+                                                onClick={() => setModalCalificarOpen(true)}
+                                                className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold rounded-lg hover:from-yellow-600 hover:to-amber-600 transition-all shadow-md hover:shadow-lg"
+                                            >
+                                                ★ Calificar Usuario
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Trabajo Publicado -> Postularse */}
+                            {trabajo.estado === 'publicado' && (!usuario || usuario.id_usuario !== trabajo.id_empleador) && (
+                                <button
+                                    onClick={() => {
+                                        const token = localStorage.getItem("token");
+                                        if (!token) {
+                                            alert("Debes iniciar sesión para postularte");
+                                            navigate("/auth");
+                                        } else {
+                                            setMostrarFormPostulacion(!mostrarFormPostulacion);
+                                        }
+                                    }}
+                                    className="w-full px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all shadow-lg hover:shadow-xl text-lg"
+                                >
+                                    {mostrarFormPostulacion ? (
+                                        <><X className="w-5 h-5" /> Cancelar Postulación</>
+                                    ) : (
+                                        <><Rocket className="w-5 h-5" /> Postularme a este Trabajo</>
+                                    )}
+                                </button>
+                            )}
+
+                            {/* Trabajo en Progreso (Empleador) -> Finalizar */}
+                            {trabajo.estado === 'en_progreso' && usuario && usuario.id_usuario === trabajo.id_empleador && (
+                                <div className="bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-6 mt-6">
+                                    <h3 className="text-xl font-bold text-orange-900 mb-3 flex items-center gap-2">
+                                        <span>⏳</span> Trabajo en Curso
+                                    </h3>
+                                    <p className="text-orange-800 mb-4 leading-relaxed">
+                                        Has aceptado a un trabajador. Cuando el trabajo termine, márcalo como finalizado para poder calificarlo.
+                                    </p>
+                                    <button
+                                        onClick={async () => {
+                                            if (!window.confirm("¿Confirmas que el trabajo ha sido completado?")) return;
+                                            const token = localStorage.getItem("token");
+                                            try {
+                                                const res = await fetch(`${API_URL}/api/trabajos/${trabajo.id_trabajo}`, {
+                                                    method: "PUT",
+                                                    headers: {
+                                                        "Content-Type": "application/json",
+                                                        Authorization: `Bearer ${token}`
+                                                    },
+                                                    body: JSON.stringify({ estado: 'completado' })
+                                                });
+                                                if (res.ok) {
+                                                    alert("¡Trabajo marcado como completado!");
+                                                    cargarTrabajo();
+                                                } else {
+                                                    alert("Error al finalizar el trabajo");
+                                                }
+                                            } catch (e) {
+                                                console.error(e);
+                                                alert("Error de conexión");
+                                            }
+                                        }}
+                                        className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-lg hover:from-green-700 hover:to-green-600 transition-all shadow-md hover:shadow-lg"
+                                    >
+                                        ✅ Marcar como Finalizado
+                                    </button>
+                                </div>
+                            )}
+
+                            {mostrarFormPostulacion && (
+                                <form onSubmit={handlePostular} className="mt-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200">
+                                    <label className="block text-sm font-bold text-gray-700 mb-3">
+                                        Mensaje (opcional)
+                                    </label>
+                                    <textarea
+                                        value={mensaje}
+                                        onChange={(e) => setMensaje(e.target.value)}
+                                        className="w-full rounded-lg border-2 border-gray-300 py-3 px-4 text-gray-900 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 mb-4 transition-all"
+                                        rows="4"
+                                        placeholder="Escribe un mensaje para el empleador..."
+                                    />
+                                    <button
+                                        type="submit"
+                                        className="px-6 py-3 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-lg hover:from-orange-700 hover:to-orange-600 transition-all shadow-md hover:shadow-lg"
+                                    >
+                                        Enviar Postulación
+                                    </button>
+                                </form>
+                            )}
                         </div>
                     </div>
 
-                    <h1 className="text-3xl font-bold text-gray-900 mb-4">{trabajo.titulo}</h1>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <p className="text-sm text-gray-500">Tipo de pago:</p>
-                            <p className="font-semibold text-gray-900 capitalize">
+                    {/* Columna Lateral - Información */}
+                    <div className="lg:col-span-1 space-y-6">
+                        {/* Card de Pago */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <DollarSign className="w-5 h-5 text-green-600" /> Pago
+                            </h3>
+                            <p className="text-3xl font-bold text-gray-900 mb-2">
                                 {trabajo.tipo_pago === "dinero"
                                     ? formatearPrecio(trabajo.monto_pago)
                                     : "Trueque"}
                             </p>
                             {trabajo.tipo_pago === "trueque" && trabajo.descripcion_trueque && (
-                                <p className="text-sm text-gray-600 mt-1">
+                                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg mt-2">
                                     {trabajo.descripcion_trueque}
                                 </p>
                             )}
                         </div>
 
-                        <div>
-                            <p className="text-sm text-gray-500">Ubicación:</p>
-                            <p className="font-semibold text-gray-900">📍 {trabajo.ubicacion}</p>
+                        {/* Card de Ubicación */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-blue-600" /> Ubicación
+                            </h3>
+                            <p className="text-gray-700 font-medium">{trabajo.ubicacion}</p>
                         </div>
 
+                        {/* Card de Fecha */}
                         {trabajo.fecha_estimada && (
-                            <div>
-                                <p className="text-sm text-gray-500">Fecha estimada:</p>
-                                <p className="font-semibold text-gray-900">
+                            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                    <Calendar className="w-5 h-5 text-purple-600" /> Fecha Estimada
+                                </h3>
+                                <p className="text-gray-700 font-medium">
                                     {formatearFecha(trabajo.fecha_estimada)}
                                 </p>
                             </div>
                         )}
 
-                        <div>
-                            <p className="text-sm text-gray-500">Publicado por:</p>
-                            <p className="font-semibold text-gray-900">
+                        {/* Card de Empleador */}
+                        <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl shadow-lg p-6 border-2 border-orange-200">
+                            <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                <User className="w-5 h-5 text-orange-600" /> Publicado por
+                            </h3>
+                            <p className="text-gray-900 font-bold text-lg">
                                 {trabajo.empleador?.nombre} {trabajo.empleador?.apellido}
                             </p>
                         </div>
                     </div>
-
-                    <div className="mb-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-2">Descripción</h2>
-                        <p className="text-gray-700 whitespace-pre-wrap">{trabajo.descripcion}</p>
-                    </div>
-
-                    {/* LÓGICA DE BOTONES DE ACCIÓN (Postular / Calificar) */}
-
-                    {/* Caso 1: Trabajo Completado -> Mostrar Calificación */}
-                    {trabajo.estado === 'completado' && usuarioAReceptar && (
-                        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Calificación del Servicio</h3>
-                            {miCalificacion ? (
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-2">Ya calificaste este servicio:</p>
-                                    <Estrellas puntuacion={miCalificacion.puntuacion} />
-                                    {miCalificacion.comentario && (
-                                        <p className="text-gray-700 mt-2 italic">"{miCalificacion.comentario}"</p>
-                                    )}
-                                </div>
-                            ) : (
-                                <div>
-                                    <p className="text-gray-600 mb-4">El trabajo ha finalizado. Por favor califica a <strong>{usuarioAReceptar.nombre}</strong>.</p>
-                                    <button
-                                        onClick={() => setModalCalificarOpen(true)}
-                                        className="px-6 py-2 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600 transition-colors"
-                                    >
-                                        ★ Calificar Usuario
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Caso 2: Trabajo Publicado -> Postularse */}
-                    {trabajo.estado === 'publicado' && (!usuario || usuario.id_usuario !== trabajo.id_empleador) && (
-                        <button
-                            onClick={() => {
-                                const token = localStorage.getItem("token");
-                                if (!token) {
-                                    alert("Debes iniciar sesión para postularte");
-                                    navigate("/auth");
-                                } else {
-                                    setMostrarFormPostulacion(!mostrarFormPostulacion);
-                                }
-                            }}
-                            className="w-full md:w-auto px-6 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors"
-                        >
-                            {mostrarFormPostulacion ? "Cancelar Postulación" : "Postularme"}
-                            {mostrarFormPostulacion ? "Cancelar Postulación" : "Postularme"}
-                        </button>
-                    )}
-
-                    {/* Caso 3: Trabajo en Progreso (Empleador) -> Finalizar */}
-                    {trabajo.estado === 'en_progreso' && usuario && usuario.id_usuario === trabajo.id_empleador && (
-                        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mt-6">
-                            <h3 className="text-lg font-semibold text-orange-900 mb-2">Trabajo en Curso</h3>
-                            <p className="text-orange-700 mb-4">
-                                Has aceptado a un trabajador. Cuando el trabajo termine, márcalo como finalizado para poder calificarlo.
-                            </p>
-                            <button
-                                onClick={async () => {
-                                    if (!window.confirm("¿Confirmas que el trabajo ha sido completado?")) return;
-                                    const token = localStorage.getItem("token");
-                                    try {
-                                        const res = await fetch(`{API_URL}/api/trabajos/${trabajo.id_trabajo}`, {
-                                            method: "PUT",
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                                Authorization: `Bearer ${token}`
-                                            },
-                                            body: JSON.stringify({ estado: 'completado' })
-                                        });
-                                        if (res.ok) {
-                                            alert("¡Trabajo marcado como completado!");
-                                            cargarTrabajo();
-                                            // Recargar para que aparezca el form de calificar
-                                        } else {
-                                            alert("Error al finalizar el trabajo");
-                                        }
-                                    } catch (e) {
-                                        console.error(e);
-                                        alert("Error de conexión");
-                                    }
-                                }}
-                                className="px-6 py-2 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 transition-colors"
-                            >
-                                ✅ Marcar como Finalizado
-                            </button>
-                        </div>
-                    )}
-
-                    {mostrarFormPostulacion && (
-                        <form onSubmit={handlePostular} className="mt-4 p-4 bg-gray-50 rounded-lg">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Mensaje (opcional)
-                            </label>
-                            <textarea
-                                value={mensaje}
-                                onChange={(e) => setMensaje(e.target.value)}
-                                className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900 focus:ring-2 focus:ring-orange-600 mb-3"
-                                rows="4"
-                                placeholder="Escribe un mensaje para el empleador..."
-                            />
-                            <button
-                                type="submit"
-                                className="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
-                            >
-                                Enviar Postulación
-                            </button>
-                        </form>
-                    )}
                 </div>
 
                 {/* Postulaciones */}
                 {postulaciones.length > 0 && (
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                            Postulaciones ({postulaciones.length})
-                        </h2>
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-100">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                                <ClipboardList className="w-8 h-8 text-orange-600" />
+                                Postulaciones
+                                <span className="ml-2 px-3 py-1 bg-orange-100 text-orange-800 text-sm font-semibold rounded-full">
+                                    {postulaciones.length}
+                                </span>
+                            </h2>
+                        </div>
                         <div className="space-y-4">
                             {postulaciones.map((post) => (
                                 <div
                                     key={post.id_postulacion}
-                                    className="border border-gray-200 rounded-lg p-4"
+                                    className="bg-white border-2 border-gray-100 rounded-xl p-5 hover:shadow-xl hover:border-orange-200 transition-all duration-300 group"
                                 >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div>
-                                            <p className="font-semibold text-gray-900">
-                                                {post.trabajador?.nombre} {post.trabajador?.apellido}
-                                            </p>
-                                            <p className="text-sm text-gray-500">
-                                                {new Date(post.fecha_postulacion).toLocaleDateString(
-                                                    "es-CO"
-                                                )}
-                                            </p>
+                                    <div className="flex justify-between items-start mb-3">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                {/* Avatar inicial */}
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                                                    {post.trabajador?.nombre?.[0]}{post.trabajador?.apellido?.[0]}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <p className="font-bold text-gray-900 text-lg">
+                                                            {post.trabajador?.nombre} {post.trabajador?.apellido}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => {
+                                                                setTrabajadorSeleccionado(post.trabajador);
+                                                                setModalPerfilOpen(true);
+                                                            }}
+                                                            className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-semibold rounded-lg hover:from-blue-700 hover:to-blue-600 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                                        >
+                                                            <User className="w-4 h-4" /> Ver Perfil
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                                                        <Calendar className="w-4 h-4" />
+                                                        {new Date(post.fecha_postulacion).toLocaleDateString(
+                                                            "es-CO",
+                                                            { year: 'numeric', month: 'long', day: 'numeric' }
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                         <span
-                                            className={`px-3 py-1 text-xs font-semibold rounded-full capitalize ${post.estado === "aceptada"
-                                                ? "bg-green-100 text-green-800"
+                                            className={`px-4 py-2 text-xs font-bold rounded-full capitalize shadow-sm ${post.estado === "aceptada"
+                                                ? "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200"
                                                 : post.estado === "rechazada"
-                                                    ? "bg-red-100 text-red-800"
-                                                    : "bg-yellow-100 text-yellow-800"
+                                                    ? "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border border-red-200"
+                                                    : "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200"
                                                 }`}
                                         >
-                                            {post.estado}
+                                            {post.estado === "aceptada" ? "✅ Aceptada" : post.estado === "rechazada" ? "❌ Rechazada" : "⏳ Pendiente"}
                                         </span>
                                     </div>
+
                                     {post.mensaje && (
-                                        <p className="text-gray-700 mt-2">{post.mensaje}</p>
+                                        <div className="bg-gray-50 border-l-4 border-orange-400 rounded-lg p-4 mt-3">
+                                            <p className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-2"><MessageSquare className="w-4 h-4" /> Mensaje del trabajador:</p>
+                                            <p className="text-gray-700 italic">"{post.mensaje}"</p>
+                                        </div>
                                     )}
 
                                     {/* Botones para el Empleador */}
                                     {usuario && trabajo && usuario.id_usuario === trabajo.id_empleador && post.estado === 'pendiente' && (
-                                        <div className="mt-4 flex gap-3">
+                                        <div className="mt-4 pt-4 border-t border-gray-200 flex gap-3">
                                             <button
                                                 onClick={() => handleGestionarPostulacion(post.id_postulacion, 'aceptar')}
-                                                className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                                                className="flex-1 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                                             >
-                                                ✅ Aceptar
+                                                <span className="text-lg">✅</span> Aceptar Postulación
                                             </button>
                                             <button
                                                 onClick={() => handleGestionarPostulacion(post.id_postulacion, 'rechazar')}
-                                                className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                                                className="flex-1 px-5 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold rounded-lg hover:from-red-700 hover:to-rose-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
                                             >
-                                                ❌ Rechazar
+                                                <span className="text-lg">❌</span> Rechazar Postulación
                                             </button>
                                         </div>
                                     )}
@@ -504,6 +582,16 @@ function Detalles() {
                 onSubmit={handleCalificar}
                 usuarioReceptor={usuarioAReceptar}
             />
+
+            {modalPerfilOpen && trabajadorSeleccionado && (
+                <ModalPerfilTrabajador
+                    trabajador={trabajadorSeleccionado}
+                    onClose={() => {
+                        setModalPerfilOpen(false);
+                        setTrabajadorSeleccionado(null);
+                    }}
+                />
+            )}
         </div>
     );
 }

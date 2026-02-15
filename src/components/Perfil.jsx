@@ -73,15 +73,21 @@ function Perfil() {
     }
 
     return (
-        <div>
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
             <Encabezado />
 
-            <div className="container mx-auto px-4 py-8 max-w-4xl">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
+            <div className="container mx-auto px-4 py-8 max-w-5xl">
+                {/* Header con gradiente */}
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent mb-2">
+                        Mi Perfil
+                    </h1>
+                    <p className="text-gray-600">Administra tu información personal y configuración</p>
+                </div>
 
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                     {!editando ? (
-                        <>
+                        <div>
                             <DatosPersonales
                                 usuario={usuario}
                                 onEdit={() => setEditando(true)}
@@ -97,7 +103,7 @@ function Perfil() {
                             {usuario.rolesAsignados?.some(r => r.rol.nombre === "Empleador") && (
                                 <MisPublicaciones usuarioId={usuario.id_usuario} />
                             )}
-                        </>
+                        </div>
 
                     ) : (
                         <FormularioPerfil

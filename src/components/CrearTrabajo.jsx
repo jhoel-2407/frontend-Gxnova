@@ -3,6 +3,7 @@ import API_URL from '../config/api';
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Encabezado from "./Encabezado";
+import { MapPin } from 'lucide-react';
 
 function CrearTrabajo() {
     const navigate = useNavigate();
@@ -20,6 +21,7 @@ function CrearTrabajo() {
         longitud: "",
         fecha_estimada: "",
     });
+    const [foto, setFoto] = useState(null);
 
     useEffect(() => {
         if (!token) {
@@ -80,46 +82,49 @@ function CrearTrabajo() {
         }
 
         try {
-            const body = {
-                id_categoria: parseInt(formData.id_categoria),
-                titulo: formData.titulo,
-                descripcion: formData.descripcion,
-                tipo_pago: formData.tipo_pago,
-                ubicacion: formData.ubicacion,
-                latitud: formData.latitud ? parseFloat(formData.latitud) : null,
-                longitud: formData.longitud ? parseFloat(formData.longitud) : null,
-            };
+            const formDataToSend = new FormData();
+            formDataToSend.append("id_categoria", parseInt(formData.id_categoria));
+            formDataToSend.append("titulo", formData.titulo);
+            formDataToSend.append("descripcion", formData.descripcion);
+            formDataToSend.append("tipo_pago", formData.tipo_pago);
+            formDataToSend.append("ubicacion", formData.ubicacion);
+
+            if (formData.latitud) formDataToSend.append("latitud", parseFloat(formData.latitud));
+            if (formData.longitud) formDataToSend.append("longitud", parseFloat(formData.longitud));
 
             if (formData.tipo_pago === "dinero") {
-                body.monto_pago = parseFloat(formData.monto_pago);
+                formDataToSend.append("monto_pago", parseFloat(formData.monto_pago));
             } else {
-                body.descripcion_trueque = formData.descripcion_trueque;
+                formDataToSend.append("descripcion_trueque", formData.descripcion_trueque);
             }
 
             if (formData.fecha_estimada) {
-                body.fecha_estimada = new Date(formData.fecha_estimada).toISOString();
+                formDataToSend.append("fecha_estimada", new Date(formData.fecha_estimada).toISOString());
+            }
+
+            if (foto) {
+                formDataToSend.append("foto", foto);
             }
 
             const respuesta = await fetch(`${API_URL}/api/trabajos`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(body),
+                body: formDataToSend,
             });
 
             const data = await respuesta.json();
 
             if (respuesta.ok) {
-                alert("✅ Trabajo creado exitosamente");
+                alert("Trabajo creado exitosamente");
                 navigate(`/detalles/${data.trabajo.id_trabajo}`);
             } else {
-                alert(`❌ Error: ${data.error || data.message}`);
+                alert(` Error: ${data.error || data.message}`);
             }
         } catch (error) {
             console.error("Error al crear trabajo:", error);
-            alert("❌ Error de conexión con el servidor");
+            alert(" Error de conexión con el servidor");
         }
     };
 
@@ -255,6 +260,18 @@ function CrearTrabajo() {
                             />
                         </div>
 
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Foto del Trabajo (Opcional)
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setFoto(e.target.files[0])}
+                                className="w-full rounded-md border border-gray-300 py-2 px-3 text-gray-900"
+                            />
+                        </div>
+
                         {/* Coordenadas GPS */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -293,7 +310,7 @@ function CrearTrabajo() {
                             onClick={obtenerUbicacionActual}
                             className="text-sm text-orange-600 hover:text-orange-800 font-semibold flex items-center gap-1"
                         >
-                            📍 Usar mi ubicación actual
+                            <MapPin className="w-4 h-4 inline mr-1" /> Usar mi ubicación actual
                         </button>
 
                         <div>

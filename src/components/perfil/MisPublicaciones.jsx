@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import API_URL from '../../config/api';
 import { Link } from "react-router-dom";
+import { Inbox } from 'lucide-react';
 
 function MisPublicaciones({ usuarioId }) {
     const [trabajos, setTrabajos] = useState([]);
@@ -76,7 +77,7 @@ function MisPublicaciones({ usuarioId }) {
                         {/* Stats rápidas (opcional) */}
                         {job.postulaciones && job.postulaciones.length > 0 && (
                             <div className="mt-3 text-sm text-gray-600">
-                                📩 {job.postulaciones.length} postulaciones
+                                <Inbox className="w-4 h-4 inline mr-1" /> {job.postulaciones.length} postulaciones
                             </div>
                         )}
                     </div>

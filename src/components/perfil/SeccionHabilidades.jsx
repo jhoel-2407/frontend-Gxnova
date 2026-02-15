@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import API_URL from '../../config/api';
+import { Wrench, Plus, Folder, FileText, DollarSign, Save, Trash2, Loader2 } from 'lucide-react';
 
 function SeccionHabilidades({ usuarioId }) {
     const [habilidades, setHabilidades] = useState([]);
     const [categorias, setCategorias] = useState([]);
-    const [loading, setLoading] = useState(false); // [NEW] Loading state
+    const [loading, setLoading] = useState(false);
     const [mostrarFormHabilidad, setMostrarFormHabilidad] = useState(false);
     const [nuevaHabilidad, setNuevaHabilidad] = useState({
         id_categoria: "",
@@ -31,6 +32,7 @@ function SeccionHabilidades({ usuarioId }) {
 
     const cargarHabilidades = async () => {
         if (!usuarioId) return;
+        setLoading(true);
         try {
             const res = await fetch(`${API_URL}/api/habilidades/usuario/${usuarioId}`);
             const data = await res.json();
@@ -40,7 +42,7 @@ function SeccionHabilidades({ usuarioId }) {
         } catch (error) {
             console.error("Error cargando habilidades:", error);
         } finally {
-            setLoading(false); // [NEW] End loading
+            setLoading(false);
         }
     };
 
@@ -95,89 +97,150 @@ function SeccionHabilidades({ usuarioId }) {
     };
 
     return (
-        <div className="mt-8 pt-8 border-t border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Mis Habilidades</h3>
+        <div className="mt-8 pt-8 border-t-2 border-gray-200">
+            {/* Header de la sección */}
+            <div className="flex justify-between items-center mb-6">
+                <div>
+                    <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <Wrench className="w-7 h-7 text-green-600" /> Mis Habilidades
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Agrega tus habilidades y tarifas para que los empleadores te encuentren
+                    </p>
+                </div>
                 <button
                     onClick={() => setMostrarFormHabilidad(!mostrarFormHabilidad)}
-                    className="text-sm text-orange-600 hover:text-orange-800 font-semibold"
+                    className={`px-5 py-2.5 font-bold rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2 ${mostrarFormHabilidad
+                        ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700"
+                        }`}
                 >
-                    {mostrarFormHabilidad ? "- Cancelar" : "+ Agregar Habilidad"}
+                    <span className="flex items-center gap-2">
+                        {mostrarFormHabilidad ? "Cancelar" : "Agregar Habilidad"}
+                    </span>
                 </button>
             </div>
 
             {/* Formulario para agregar habilidad */}
             {mostrarFormHabilidad && (
-                <form onSubmit={handleCrearHabilidad} className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Categoría</label>
-                            <select
-                                value={nuevaHabilidad.id_categoria}
-                                onChange={(e) => setNuevaHabilidad({ ...nuevaHabilidad, id_categoria: e.target.value })}
-                                className="w-full rounded border-gray-300 text-sm"
-                                required
-                            >
-                                <option value="">Selecciona...</option>
-                                {categorias.map(cat => (
-                                    <option key={cat.id_categoria} value={cat.id_categoria}>{cat.nombre}</option>
-                                ))}
-                            </select>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-2xl mb-6 border-2 border-green-200 shadow-lg">
+                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <Plus className="w-6 h-6 text-green-600" /> Nueva Habilidad
+                    </h4>
+                    <form onSubmit={handleCrearHabilidad} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                    <Folder className="w-4 h-4" /> Categoría
+                                </label>
+                                <select
+                                    value={nuevaHabilidad.id_categoria}
+                                    onChange={(e) => setNuevaHabilidad({ ...nuevaHabilidad, id_categoria: e.target.value })}
+                                    className="w-full rounded-xl border-2 border-gray-200 py-3 px-4 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                                    required
+                                >
+                                    <option value="">Selecciona una categoría...</option>
+                                    {categorias.map(cat => (
+                                        <option key={cat.id_categoria} value={cat.id_categoria}>{cat.nombre}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                    <FileText className="w-4 h-4" /> Descripción
+                                </label>
+                                <input
+                                    type="text"
+                                    value={nuevaHabilidad.descripcion}
+                                    onChange={(e) => setNuevaHabilidad({ ...nuevaHabilidad, descripcion: e.target.value })}
+                                    className="w-full rounded-xl border-2 border-gray-200 py-3 px-4 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                                    placeholder="Ej: Instalación de cableado eléctrico"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                                    <DollarSign className="w-4 h-4" /> Tarifa por Hora
+                                </label>
+                                <input
+                                    type="number"
+                                    value={nuevaHabilidad.tarifa_hora}
+                                    onChange={(e) => setNuevaHabilidad({ ...nuevaHabilidad, tarifa_hora: e.target.value })}
+                                    className="w-full rounded-xl border-2 border-gray-200 py-3 px-4 text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                                    placeholder="Ej: 50000"
+                                    required
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Descripción</label>
-                            <input
-                                type="text"
-                                value={nuevaHabilidad.descripcion}
-                                onChange={(e) => setNuevaHabilidad({ ...nuevaHabilidad, descripcion: e.target.value })}
-                                className="w-full rounded border-gray-300 text-sm"
-                                placeholder="Ej: Instalación de cableado"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-500 mb-1">Tarifa/Hora</label>
-                            <input
-                                type="number"
-                                value={nuevaHabilidad.tarifa_hora}
-                                onChange={(e) => setNuevaHabilidad({ ...nuevaHabilidad, tarifa_hora: e.target.value })}
-                                className="w-full rounded border-gray-300 text-sm"
-                                placeholder="Ej: 50000"
-                                required
-                            />
-                        </div>
-                    </div>
-                    <button type="submit" className="w-full bg-orange-600 text-white py-2 rounded text-sm font-semibold hover:bg-orange-700">
-                        Guardar Habilidad
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                        >
+                            <Save className="w-5 h-5" /> Guardar Habilidad
+                        </button>
+                    </form>
+                </div>
             )}
 
             {/* Lista de Habilidades */}
             {loading ? (
-                <p className="text-center text-gray-500 py-4">Cargando habilidades...</p>
+                <div className="text-center py-12">
+                    <Loader2 className="inline-block animate-spin h-12 w-12 text-green-600" />
+                    <p className="text-gray-500 mt-4">Cargando habilidades...</p>
+                </div>
             ) : habilidades.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {habilidades.map((hab) => (
-                        <div key={hab.id_habilidad} className="p-4 border border-gray-200 rounded-lg flex justify-between items-start bg-gray-50">
-                            <div>
-                                <span className="inline-block px-2 py-1 mb-2 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">
+                        <div
+                            key={hab.id_habilidad}
+                            className="bg-white border-2 border-gray-100 rounded-xl p-5 hover:shadow-xl hover:border-green-200 transition-all duration-300 group relative overflow-hidden"
+                        >
+                            {/* Decoración de fondo */}
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-green-100 to-emerald-100 rounded-bl-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
+
+                            <div className="relative">
+                                {/* Badge de categoría */}
+                                <span className="inline-block px-3 py-1.5 mb-3 text-xs font-bold text-green-800 bg-gradient-to-r from-green-100 to-emerald-100 rounded-full border border-green-200">
                                     {hab.categoria.nombre}
                                 </span>
-                                <p className="text-sm font-medium text-gray-900">{hab.descripcion}</p>
-                                <p className="text-xs text-gray-500 mt-1">Tarifa: ${hab.tarifa_hora}/hr</p>
+
+                                {/* Descripción */}
+                                <p className="text-base font-bold text-gray-900 mb-3 line-clamp-2">
+                                    {hab.descripcion}
+                                </p>
+
+                                {/* Tarifa */}
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="w-6 h-6 text-green-600" />
+                                        <div>
+                                            <p className="text-xs text-gray-500">Tarifa por hora</p>
+                                            <p className="text-lg font-bold text-green-600">
+                                                ${parseInt(hab.tarifa_hora).toLocaleString('es-CO')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Botón eliminar */}
+                                <button
+                                    onClick={() => handleEliminarHabilidad(hab.id_habilidad)}
+                                    className="w-full mt-2 px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 font-semibold text-sm transition-all border border-red-200 hover:border-red-300 flex items-center justify-center gap-2"
+                                >
+                                    <Trash2 className="w-4 h-4" /> Eliminar
+                                </button>
                             </div>
-                            <button
-                                onClick={() => handleEliminarHabilidad(hab.id_habilidad)}
-                                className="text-red-500 hover:text-red-700 text-xs font-semibold"
-                            >
-                                Eliminar
-                            </button>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-gray-500 text-sm py-4">No tienes habilidades registradas aún.</p>
+                <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+                    <Wrench className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600 font-medium mb-2">No tienes habilidades registradas aún</p>
+                    <p className="text-sm text-gray-500">
+                        Agrega tus habilidades para que los empleadores puedan encontrarte
+                    </p>
+                </div>
             )}
         </div>
     );

@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { Flame, MapPin, AlertCircle } from 'lucide-react';
 
 function TrabajosDestacados({ trabajos, loading, titulo }) {
     const navigate = useNavigate();
@@ -54,7 +55,7 @@ function TrabajosDestacados({ trabajos, loading, titulo }) {
                                 >
                                     {urgente && (
                                         <div className="absolute top-0 right-0 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-bl-lg z-10">
-                                            🔥 URGENTE
+                                            <Flame className="w-4 h-4 inline mr-1" /> URGENTE
                                         </div>
                                     )}
                                     <div className="flex justify-between items-start mb-3">
@@ -87,7 +88,7 @@ function TrabajosDestacados({ trabajos, loading, titulo }) {
                                     </div>
 
                                     <div className="flex items-center text-sm text-gray-500 mb-4">
-                                        <span>📍 {trabajo.ubicacion}</span>
+                                        <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {trabajo.ubicacion}</span>
                                     </div>
 
                                     <button
@@ -98,7 +99,7 @@ function TrabajosDestacados({ trabajos, loading, titulo }) {
                                             navigate(`/detalles/${trabajo.id_trabajo}`);
                                         }}
                                     >
-                                        {urgente ? '🚨 Ver Urgencia' : 'Ver Detalles'}
+                                        {urgente ? (<><AlertCircle className="w-4 h-4 inline mr-1" /> Ver Urgencia</>) : 'Ver Detalles'}
                                     </button>
                                 </div>
                             );

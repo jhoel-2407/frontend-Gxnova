@@ -37,7 +37,7 @@ const HeroSection = () => {
                             <div className="bg-gray-100 h-[600px] rounded-[2rem] overflow-hidden flex flex-col items-center pt-10">
                                 <div className="w-32 h-6 bg-slate-200 rounded-full mb-8"></div>
                                 <div className="w-full h-full bg-white rounded-t-3xl shadow-inner p-6">
-                                    <div className="flex gap-4 mb-6 text-2xl font-bold text-slate-800">Hola, Juan! 👋</div>
+                                    <div className="flex gap-4 mb-6 text-2xl font-bold text-slate-800">Hola, Juan! <Hand className="w-6 h-6 inline" /></div>
                                     <div className="grid grid-cols-2 gap-4 mb-6">
                                         <div className="bg-orange-100 p-4 rounded-xl h-24"></div>
                                         <div className="bg-blue-100 p-4 rounded-xl h-24"></div>
