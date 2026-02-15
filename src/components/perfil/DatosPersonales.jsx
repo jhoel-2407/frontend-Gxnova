@@ -39,15 +39,15 @@ function DatosPersonales({ usuario, onEdit, onRefresh }) {
             });
 
             if (res.ok) {
-                alert(`✅ Ahora tienes el perfil de ${nuevoRol}`);
+                alert(`Ahora tienes el perfil de ${nuevoRol}`);
                 onRefresh();
             } else {
                 const data = await res.json();
-                alert(`❌ Error: ${data.error || data.message}`);
+                alert(`Error: ${data.error || data.message}`);
             }
         } catch (error) {
             console.error("Error activando rol:", error);
-            alert("❌ Error de conexión");
+            alert("Error de conexión");
         }
     };
 
@@ -63,7 +63,7 @@ function DatosPersonales({ usuario, onEdit, onRefresh }) {
                         {/* Avatar con borde y sombra */}
                         <div className="relative">
                             <img
-                                src={usuario.foto_perfil || "https://via.placeholder.com/150"}
+                                src={usuario.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(usuario.nombre)}+${encodeURIComponent(usuario.apellido)}&background=random`}
                                 alt="Foto de perfil"
                                 className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-2xl"
                             />

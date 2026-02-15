@@ -42,14 +42,14 @@ function FormularioPerfil({ usuario, onCancel, onSuccess }) {
             const result = await respuesta.json();
 
             if (respuesta.ok) {
-                alert("✅ Perfil actualizado exitosamente");
+                alert("Perfil actualizado exitosamente");
                 onSuccess();
             } else {
-                alert(`❌ Error: ${result.error || result.message}`);
+                alert(`Error: ${result.error || result.message}`);
             }
         } catch (error) {
             console.error("Error al actualizar:", error);
-            alert("❌ Error de conexión con el servidor");
+            alert("Error de conexión con el servidor");
         } finally {
             setUploading(false);
         }
@@ -78,7 +78,7 @@ function FormularioPerfil({ usuario, onCancel, onSuccess }) {
                 <div className="relative group">
                     <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 p-1">
                         <img
-                            src={preview || "https://via.placeholder.com/150"}
+                            src={preview || `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.nombre)}+${encodeURIComponent(formData.apellido)}&background=random`}
                             alt="Preview"
                             className="w-full h-full rounded-full object-cover bg-white"
                         />
