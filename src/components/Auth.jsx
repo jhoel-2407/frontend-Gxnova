@@ -102,39 +102,79 @@ function Auth() {
             return;
         }
 
+        // Validar que se hayan seleccionado las imágenes obligatorias
+        const fotoCedula = document.getElementById('foto_cedula').files[0];
+        const selfie = document.getElementById('selfie').files[0];
+
+        if (!fotoCedula || !selfie) {
+            showMessage('error', "La foto de cédula y la selfie son obligatorias para verificar tu identidad.");
+            return;
+        }
+
         try {
+            // Crear FormData para enviar archivos
+            const formData = new FormData();
+            formData.append('nombre', nombre);
+            formData.append('apellido', apellido);
+            formData.append('correo', emailRegister);
+            formData.append('password', passwordRegister);
+            formData.append('telefono', telefono);
+            formData.append('rolNombre', rolNombre);
+
+            // Agregar imágenes obligatorias
+            formData.append('foto_cedula', fotoCedula);
+            formData.append('selfie', selfie);
+
+            // Agregar foto de perfil si existe (opcional)
+            const fotoPerfil = document.getElementById('foto_perfil').files[0];
+            if (fotoPerfil) {
+                formData.append('foto_perfil', fotoPerfil);
+            }
+
+            showMessage('info', "Verificando tu identidad... Esto puede tardar unos segundos.");
+
             const respuesta = await fetch(`${API_URL}/api/auth/register`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    nombre,
-                    apellido,
-                    correo: emailRegister,
-                    password: passwordRegister,
-                    telefono,
-                    rolNombre
-                }),
+                // NO incluir Content-Type, el navegador lo establece automáticamente con boundary
+                body: formData,
             });
 
             const data = await respuesta.json();
 
             if (respuesta.ok) {
-                showMessage('success', "Registro exitoso. Ahora puedes iniciar sesión.");
-                setNombre(''); setApellido(''); setEmailRegister(''); setPasswordRegister(''); setConfirmPassword(''); setTelefono(''); setRolNombre('Trabajador');
-                setTimeout(() => handleToggleView("login"), 2000);
+                showMessage('success', "✅ Registro exitoso. Tu identidad ha sido verificada. Ahora puedes iniciar sesión.");
+                setNombre('');
+                setApellido('');
+                setEmailRegister('');
+                setPasswordRegister('');
+                setConfirmPassword('');
+                setTelefono('');
+                setRolNombre('Trabajador');
+
+                // Limpiar inputs de archivos
+                document.getElementById('foto_cedula').value = '';
+                document.getElementById('selfie').value = '';
+                document.getElementById('foto_perfil').value = '';
+                document.getElementById('preview_cedula').classList.add('hidden');
+                document.getElementById('preview_selfie').classList.add('hidden');
+                document.getElementById('preview_perfil').classList.add('hidden');
+
+                setTimeout(() => handleToggleView("login"), 3000);
 
             } else {
-                showMessage('error', ` Error en el registro: ${data.message || 'Error desconocido'}`);
+                showMessage('error', `❌ ${data.message || 'Error desconocido'}`);
             }
         } catch (error) {
             console.error("Error de Registro:", error);
-            showMessage('error', " Error de conexión con el servidor.");
+            showMessage('error', "❌ Error de conexión con el servidor.");
         }
     };
 
     const messageClasses = messageType === 'error'
         ? "bg-red-50 border-red-300 text-red-700"
-        : "bg-green-50 border-green-300 text-green-700";
+        : messageType === 'info'
+            ? "bg-blue-50 border-blue-300 text-blue-700"
+            : "bg-green-50 border-green-300 text-green-700";
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 font-inter">

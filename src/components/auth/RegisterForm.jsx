@@ -146,6 +146,101 @@ function RegisterForm({
                 </div>
             </div>
 
+            {/* Sección de Verificación de Identidad */}
+            <div className="space-y-3 pt-3 border-t border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-700">Verificación de Identidad</h3>
+                <p className="text-xs text-gray-500">
+                    Para garantizar la seguridad, necesitamos verificar tu identidad
+                </p>
+
+                {/* Foto de Cédula */}
+                <div className="space-y-1">
+                    <label htmlFor="foto_cedula" className="text-sm font-medium text-gray-700">
+                        Foto de Cédula <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="file"
+                        id="foto_cedula"
+                        name="foto_cedula"
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                // Crear preview
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                    document.getElementById('preview_cedula').src = reader.result;
+                                    document.getElementById('preview_cedula').classList.remove('hidden');
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }}
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-600 file:mr-4 file:py-2 file:px-4 file:rounded-l-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                        required
+                    />
+                    <img id="preview_cedula" className="hidden mt-2 w-32 h-32 object-cover rounded-md border border-gray-300" alt="Preview cédula" />
+                </div>
+
+                {/* Selfie */}
+                <div className="space-y-1">
+                    <label htmlFor="selfie" className="text-sm font-medium text-gray-700">
+                        Selfie (Foto de tu rostro) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="file"
+                        id="selfie"
+                        name="selfie"
+                        accept="image/*"
+                        capture="user"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                // Crear preview
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                    document.getElementById('preview_selfie').src = reader.result;
+                                    document.getElementById('preview_selfie').classList.remove('hidden');
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }}
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-600 file:mr-4 file:py-2 file:px-4 file:rounded-l-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                        required
+                    />
+                    <img id="preview_selfie" className="hidden mt-2 w-32 h-32 object-cover rounded-md border border-gray-300" alt="Preview selfie" />
+                    <p className="text-xs text-gray-500">
+                        📸 Asegúrate de que tu rostro sea visible y esté bien iluminado
+                    </p>
+                </div>
+
+                {/* Foto de Perfil (Opcional) */}
+                <div className="space-y-1">
+                    <label htmlFor="foto_perfil" className="text-sm font-medium text-gray-700">
+                        Foto de Perfil (Opcional)
+                    </label>
+                    <input
+                        type="file"
+                        id="foto_perfil"
+                        name="foto_perfil"
+                        accept="image/*"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                // Crear preview
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                    document.getElementById('preview_perfil').src = reader.result;
+                                    document.getElementById('preview_perfil').classList.remove('hidden');
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }}
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-600 file:mr-4 file:py-2 file:px-4 file:rounded-l-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                    />
+                    <img id="preview_perfil" className="hidden mt-2 w-32 h-32 object-cover rounded-md border border-gray-300" alt="Preview perfil" />
+                </div>
+            </div>
+
             <button
                 type="submit"
                 className={`group relative flex w-full justify-center rounded-md bg-${PRIMARY_COLOR} px-4 py-2 text-sm font-medium text-white hover:bg-${HOVER_COLOR} focus:outline-none focus:ring-2 focus:ring-${PRIMARY_COLOR}/50 transition duration-150`}
